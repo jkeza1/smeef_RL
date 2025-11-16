@@ -1,101 +1,105 @@
-# environment/smeef_env.py
 import gymnasium as gym
 from gymnasium import spaces
 import numpy as np
-import pygame
 
 class SMEEFEnv(gym.Env):
-    """
-    Custom Gymnasium environment simulating empowerment for single mothers.
-    The agent (a single mother) moves around a grid environment to collect skills,
-    gain resources, and avoid burnout while striving to reach economic empowerment.
-    """
+    metadata = {'render.modes': ['human']}
 
-    metadata = {"render_modes": ["human"], "render_fps": 10}
+    def __init__(self, grid_size=6):
+        super().__init__()
 
-    def __init__(self, render_mode=None, grid_size=5, config=None):
-       super(SMEEFEnv, self).__init__()
+        self.grid_size = grid_size
+        
+        # Actions: 0=UP, 1=DOWN, 2=LEFT, 3=RIGHT
+        self.action_space = spaces.Discrete(4)
 
-    # Override grid_size from config if provided
-       if config is not None:
-           grid_size = config.get("grid_size", grid_size)
+        # Observation: agent position (x,y) as float32
+        self.observation_space = spaces.Box(
+            low=0, high=grid_size - 1, shape=(2,), dtype=np.float32
+        )
 
-       self.grid_size = grid_size
-       self.window_size = 500
-       self.render_mode = render_mode
-
-    # Define action space and observation space
-       self.action_space = spaces.Discrete(6)
-       low = np.array([0, 0, 0, 0], dtype=np.float32)
-       high = np.array([self.grid_size - 1, self.grid_size - 1, 10, 10], dtype=np.float32)
-       self.observation_space = spaces.Box(low, high, dtype=np.float32)
-
-    # Initialize state variables
-       self.agent_pos = np.array([0, 0])
-       self.skill_level = 0
-       self.energy_level = 10
-       self.goal_pos = np.array([self.grid_size - 1, self.grid_size - 1])
-
-    # Rendering variables
-       self.window = None
-       self.clock = None
-
+        self.reset()
 
     def reset(self, seed=None, options=None):
         super().reset(seed=seed)
-        self.agent_pos = np.array([0, 0])
-        self.skill_level = 0
-        self.energy_level = 10
+        # Agent starts at top-left
+        self.agent_pos = np.array([0, 0], dtype=np.float32)
 
-        observation = np.array([
-            *self.agent_pos, self.skill_level, self.energy_level
-        ], dtype=np.float32)
-        info = {}
-        return observation, info
+        # Object placements
+        self.skill_centers = [(1, 3), (2, 1)]         # 🟨
+        self.income_ops = [(3, 4)]                    # 🟦
+        self.community_support = [(4, 2), (1, 4)]     # 🟪
+        self.challenges = [(2, 3), (4, 1), (3, 2)]    # 🟥
+
+        # Goal
+        self.goal = (5, 5)                             # 🟩
+
+        self.total_reward = 0
+        return self.agent_pos, {}  # Gymnasium-style
 
     def step(self, action):
-        reward = -0.1  # small penalty to encourage efficiency
-        terminated = False
+        x, y = self.agent_pos
 
-        # Movement Actions
-        if action == 0 and self.agent_pos[1] > 0:  # UP
-            self.agent_pos[1] -= 1
-        elif action == 1 and self.agent_pos[1] < self.grid_size - 1:  # DOWN
-            self.agent_pos[1] += 1
-        elif action == 2 and self.agent_pos[0] > 0:  # LEFT
-            self.agent_pos[0] -= 1
-        elif action == 3 and self.agent_pos[0] < self.grid_size - 1:  # RIGHT
-            self.agent_pos[0] += 1
-        elif action == 4:  # LEARN
-            self.skill_level += 1
-            reward += 2
-        elif action == 5:  # REST
-            self.energy_level = min(self.energy_level + 2, 10)
-            reward += 1
+        # Movement
+        if action == 0 and x > 0:            # UP
+            x -= 1
+        elif action == 1 and x < self.grid_size - 1:  # DOWN
+            x += 1
+        elif action == 2 and y > 0:          # LEFT
+            y -= 1
+        elif action == 3 and y < self.grid_size - 1:  # RIGHT
+            y += 1
 
-        # Decrease energy with every move
-        self.energy_level -= 1
+        self.agent_pos = np.array([x, y], dtype=np.float32)
+        reward = 0
+        pos_tuple = (x, y)
 
-        # Terminal condition: out of energy or reached goal
-        if np.array_equal(self.agent_pos, self.goal_pos) and self.skill_level >= 5:
-            reward += 10
-            terminated = True
-        elif self.energy_level <= 0:
-            reward -= 5
-            terminated = True
+        # REWARDS
+        if pos_tuple in self.skill_centers:
+            reward += 5    # 🟨 gain skills
+        if pos_tuple in self.income_ops:
+            reward += 10   # 🟦 income
+        if pos_tuple in self.community_support:
+            reward += 8    # 🟪 community help
+        if pos_tuple in self.challenges:
+            reward -= 5    # 🟥 challenge
 
-        observation = np.array([
-            *self.agent_pos, self.skill_level, self.energy_level
-        ], dtype=np.float32)
+        # GOAL REACHED
+        terminated = pos_tuple == self.goal
+        if terminated:
+            reward += 50   # 🟩 empowerment zone
 
-        info = {}
-        return observation, reward, terminated, False, info
+        truncated = False
+        self.total_reward += reward
 
-    def render(self):
-        from environment.rendering import render_environment
-        return render_environment(self)
+        return self.agent_pos, reward, terminated, truncated, {}
 
-    def close(self):
-        if self.window is not None:
-            pygame.display.quit()
-            pygame.quit()
+    def render(self, mode="human"):
+        if mode != "human":
+            raise NotImplementedError("Only human render mode is supported for SMEEFEnv.")
+
+        # Create grid
+        grid = [["⬜" for _ in range(self.grid_size)] for _ in range(self.grid_size)]
+
+        # Place objects
+        for x, y in self.skill_centers:
+            grid[x][y] = "🟨"
+        for x, y in self.income_ops:
+            grid[x][y] = "🟦"
+        for x, y in self.community_support:
+            grid[x][y] = "🟪"
+        for x, y in self.challenges:
+            grid[x][y] = "🟥"
+
+        goal_x, goal_y = self.goal
+        grid[goal_x][goal_y] = "🟩"
+
+        # Place agent
+        ax, ay = self.agent_pos
+        ax, ay = int(ax), int(ay)
+        grid[ax][ay] = "🤖"
+
+        # Print grid
+        for row in grid:
+            print(" ".join(row))
+        print("-" * 20)

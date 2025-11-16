@@ -1,11 +1,12 @@
 # training/dqn_training.py
 import os
+import gymnasium as gym
 from stable_baselines3 import DQN
 from environment.smeef_env import SMEEFEnv
 from agents.dqn_agent import create_dqn_agent
 
 # Create environment
-env = SMEEFEnv(render_mode=None)
+env = SMEEFEnv()
 
 # Create DQN agent
 model = create_dqn_agent(env, learning_rate=1e-3, buffer_size=50000, batch_size=32)

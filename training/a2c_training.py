@@ -4,7 +4,7 @@ from environment.smeef_env import SMEEFEnv
 from agents.a2c_agent import create_a2c_agent
 
 # Create environment
-env = SMEEFEnv(render_mode=None)
+env = SMEEFEnv()
 
 # Create A2C agent
 model = create_a2c_agent(env, learning_rate=7e-4, n_steps=5)

@@ -1,14 +1,12 @@
-# environment/rendering.py
 import pygame
 import numpy as np
 
-# Define colors
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
-GREEN = (0, 200, 0)
-RED = (255, 0, 0)
-BLUE = (0, 100, 255)
-YELLOW = (255, 255, 0)
+GREEN = (0, 200, 0)   # Goal
+BLUE = (0, 100, 255)  # Agent
+
+WINDOW_SIZE = 500
 
 def render_environment(env):
     if env.window is None:
@@ -19,6 +17,7 @@ def render_environment(env):
         env.clock = pygame.time.Clock()
 
     env.window.fill(WHITE)
+    pygame.event.pump()  # process window events
 
     grid_size = env.grid_size
     cell_size = env.window_size // grid_size
@@ -29,30 +28,25 @@ def render_environment(env):
             rect = pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size)
             pygame.draw.rect(env.window, BLACK, rect, 1)
 
-    # Draw goal (empowerment area)
-    goal_rect = pygame.Rect(
-        env.goal_pos[0] * cell_size, env.goal_pos[1] * cell_size, cell_size, cell_size
-    )
+    # Draw goal
+    gx, gy = env.goal_pos
+    goal_rect = pygame.Rect(gx * cell_size, gy * cell_size, cell_size, cell_size)
     pygame.draw.rect(env.window, GREEN, goal_rect)
 
     # Draw agent
-    agent_rect = pygame.Rect(
-        env.agent_pos[0] * cell_size + 5,
-        env.agent_pos[1] * cell_size + 5,
-        cell_size - 10,
-        cell_size - 10,
-    )
+    ax, ay = env.agent_pos
+    agent_rect = pygame.Rect(ax * cell_size + 5, ay * cell_size + 5, cell_size - 10, cell_size - 10)
     pygame.draw.rect(env.window, BLUE, agent_rect)
 
     # Display stats
     font = pygame.font.Font(None, 26)
-    text = font.render(
-        f"Skill: {env.skill_level} | Energy: {env.energy_level}", True, BLACK
-    )
+    text = font.render(f"Skill: {env.skill_level} | Energy: {env.energy_level}", True, BLACK)
     env.window.blit(text, (10, 10))
 
     pygame.display.flip()
     env.clock.tick(env.metadata["render_fps"])
-    frame = pygame.surfarray.array3d(env.window)  # shape: (width, height, 3)
-    frame = np.transpose(frame, (1, 0, 2))        # transpose to (height, width, 3)
+
+    # Return frame (optional, for video recording)
+    frame = pygame.surfarray.array3d(env.window)
+    frame = np.transpose(frame, (1, 0, 2))
     return frame

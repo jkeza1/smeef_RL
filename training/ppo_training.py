@@ -4,7 +4,7 @@ from environment.smeef_env import SMEEFEnv
 from agents.ppo_agent import create_ppo_agent
 
 # Create environment
-env = SMEEFEnv(render_mode=None)
+env = SMEEFEnv()
 
 # Create PPO agent
 model = create_ppo_agent(env, learning_rate=3e-4, n_steps=2048, batch_size=64)
