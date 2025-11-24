@@ -1,6 +1,6 @@
 # SMEEF_RL — Assignment-ready project
 
-This repository contains a custom mission-based environment (SMEEF) and training/evaluation scripts for four RL methods required by the assignment: Value-based (DQN) and Policy-based (REINFORCE, PPO, A2C). The code and documentation are organized to make it straightforward to run experiments, repeat hyperparameter sweeps (10+ runs per algorithm), produce recordings, and compile a short report.
+This repository contains a custom mission-based environment (SMEEF) and training/evaluation scripts for four RL methods required by the assignment: Value-based (DQN) and Policy-based (REINFORCE, PPO, A2C). The primary demo/entry point for interactive visualization and playing back saved models is `smeef.py` (see below). The code and documentation are organized to make it straightforward to run experiments, repeat hyperparameter sweeps (10+ runs per algorithm), produce recordings, and compile a short report.
 
 ## Repository layout
 
@@ -29,6 +29,32 @@ project_root/
 
 - requirements.txt
 - README.md
+
+## Entry point: `smeef.py`
+
+The main interactive/demo file is `smeef.py`. Use it to:
+
+- Run a cinematic demo of the environment (uses `pygame` for visualization).
+- Load a saved SB3 model (DQN/PPO/A2C) if available and drive the agent with it, otherwise run a random/exploratory demo.
+
+Key sections inside `smeef.py` (high level structure):
+
+- Constants & enhanced visual configuration (colors, palette, CELL_SIZE)
+- Particle effects & small visual helper classes (Particle)
+- Utility helpers (safe_float, safe_rect_args)
+- Model loader: `load_model()` — attempts to load the best available model
+- Rendering functions: `draw_grid()`, `draw_animated_agent()`, `draw_resource_section()`, etc.
+- Demo runner: `run_demo()` — main loop that steps the env, queries the model (or samples random actions), renders, and prints terminal logs
+- `if __name__ == '__main__':` — UX-friendly welcome banner and `run_demo()` launch
+
+To run the interactive demo (recommended after installing requirements):
+
+```powershell
+python smeef.py
+```
+
+You can change which algorithm/model is used by editing the `ALGORITHM` and `MODEL_PATHS` constants near the top of `smeef.py`.
+
 
 ## Mapping to the assignment requirements
 

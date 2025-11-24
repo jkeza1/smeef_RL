@@ -1,3 +1,21 @@
+"""smeef.py
+
+Entry/demo script for the SMEEF environment. This file provides a polished
+visual demo + optional model playback. High-level structure:
+
+- Configuration (ALGORITHM, MODEL_PATHS, visual constants)
+- Particle class + visual helpers
+- Utility helpers (safe_float, safe_rect_args)
+- Model loader: load_model()
+- Rendering: draw_grid(), draw_animated_agent(), draw_resource_section(), etc.
+- Demo runner: run_demo()
+- Main launcher: prints banner and calls run_demo()
+
+Run with:
+
+    python smeef.py
+
+"""
 import pygame
 import os
 import numpy as np
