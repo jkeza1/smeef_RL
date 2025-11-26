@@ -164,20 +164,47 @@ See `config/training_config.yaml` for default training hyperparameters.
 
 ## Project layout (important files)
 
-- `smeef.py` — interactive demo and model playback (main entrypoint for visualization)
-- `smeef_demo.py`, `ppo_demo.py`, `enhanced_demo.py`, `run_random_demo.py` — demo scripts
-- `environment/` — custom environment implementation and wrappers
-  - `smeef_env.py` — core environment
-  - `obs_wrappers.py` — helper wrappers (NormalizeFlattenObs, etc.)
-  - `rendering.py` — rendering helpers
-- `agents/` — agent policy code
-  - `a2c_agent.py`, `dqn_agent.py`, `ppo_agent.py`, `reinforce_agent.py`
-- `training/` — training runners and utilities
-- `models/` — saved model artifacts (SB3 `.zip`, PyTorch `.pt`/`.pth`)
-- `outputs/` — generated outputs: `logs/`, `metrics/`, `plots/`, `videos/`
-- `config/` — configuration YAMLs (`env_config.yaml`, `training_config.yaml`)
-- `requirements.txt` — pinned Python dependencies
-- `scripts/` — plotting and analysis scripts (plotting helpers used to build figures)
+## Project structure (as requested)
+
+Below is the repository structure produced from your PowerShell Get-ChildItem listing. Use this as the authoritative project layout.
+
+- Top-level folders
+	- `agents/`
+	- `config/`
+	- `environment/`
+	- `models/`
+	- `outputs/`
+	- `scripts/`
+	- `training/`
+
+- Important top-level files (examples from workspace)
+	- `create_diagram.py`
+	- `enhanced_demo.py`
+	- `ppo_demo.py`
+	- `README.md` (this file)
+	- `requirements.txt`
+	- `results_dashboard.py`
+	- `run_random_demo.py`
+	- `smeef.py`
+	- `smeef_demo.py`
+	- `__init__.py`
+
+- Local virtual environment (present in workspace)
+	- `.venv311/`  (recommended to add to `.gitignore`)
+
+- Notable subfolders & outputs in workspace
+	- `models/a2c/`, `models/dqn/`, `models/ppo/`, `models/reinforce/`
+	- `models/dqn/run_*` (per-run folders)
+	- `environment/` contains `smeef_env.py`, `obs_wrappers.py`, `rendering.py`
+	- `outputs/logs/`, `outputs/metrics/`, `outputs/plots/`, `outputs/videos/`
+	- `outputs/logs/<algorithm>/` (e.g. `a2c`, `dqn`, `ppo`, `reinforce`)
+	- `scripts/` contains plotting/analysis scripts: `generate_analysis_plots.py`, `plot_training_stability.py`, etc.
+	- `training/` contains training runners: `a2c_training.py`, `dqn_training.py`, `ppo_training.py`, `reinforce_training.py`, `compare_all.py`
+
+Notes
+
+- I used your Get-ChildItem output as the canonical structure. If you want me to reorganize files into a different folder layout (move files on disk and update imports), I can do that — tell me the target structure and I'll perform a safe refactor and run quick checks.
+- I also recommend adding `.venv311/`, `__pycache__/` and `*.pyc` to `.gitignore` to keep the repository clean; I'll add that next unless you'd rather manage `.gitignore` yourself.
 
 ## Models & outputs
 
@@ -214,10 +241,4 @@ If preparing this repository for a submission or external sharing, include:
 
 ---
 
-If you'd like any of the suggested follow-ups implemented (e.g., `.gitignore`, report template, or moving/renaming files for clearer structure), tell me which and I'll proceed.
-Common issues and fixes
-
-
-
-- Observation shape errors
 

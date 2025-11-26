@@ -1,0 +1,7 @@
+.venv311/
+__pycache__/
+*.pyc
+.DS_Store
+# Optional: ignore large model/output folders if you don't want them tracked
+# models/
+# outputs/
