@@ -247,8 +247,6 @@ Comprehensive results including:
 
 ### PPO performance graph
 
-![PPO: Actual vs Expected Performance](<img width="1366" height="655" alt="ppo_graph" src="https://github.com/user-attachments/assets/3a9c5e9e-d222-4ba4-9282-df8550b9529d" />
-)
 
 *Figure: PPO actual vs expected performance across hyperparameter sweeps.*
 
@@ -267,3 +265,4 @@ Project Repository: smeef_RL
 ## License
 
 This project is for educational purposes as part of a reinforcement learning summative assignment.
+
