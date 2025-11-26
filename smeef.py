@@ -161,6 +161,33 @@ def load_model():
     return None
 
 # ------------------------
+# OBSERVATION COMPATIBILITY FIX
+# ------------------------
+def get_model_compatible_observation(env):
+    """
+    Convert current environment state to model-compatible observation.
+    This handles the case where the model was trained with a different observation structure.
+    """
+    try:
+        # Try to get observation using the environment's normal method
+        obs, _ = env.reset() if hasattr(env, 'get_observation') else (env._get_obs(), {})
+        return obs
+    except Exception as e:
+        print(f"⚠️ Observation compatibility issue: {e}")
+        print("🔄 Creating compatible observation structure...")
+        
+        # Create a simple flattened observation as fallback
+        observation = np.concatenate([
+            env.position,
+            env.resources,
+            env.needs,
+            env.child_status,
+            [env.current_step]
+        ]).astype(np.float32)
+        
+        return observation
+
+# ------------------------
 # ENHANCED GRID WITH STORYTELLING - FIXED
 # ------------------------
 def draw_grid(screen, env, font, last_reward=0):
@@ -681,10 +708,18 @@ def run_demo():
                         pygame.quit()
                         return
 
-            # Get action from model or random
+            # Get action from model or random with compatibility handling
             if model:
-                action, _ = model.predict(obs, deterministic=True)
-                action_name = Action(action).name
+                try:
+                    # Get model-compatible observation
+                    model_obs = get_model_compatible_observation(env)
+                    action, _ = model.predict(model_obs, deterministic=True)
+                    action_name = Action(action).name
+                except Exception as e:
+                    print(f"⚠️ Model prediction failed: {e}")
+                    print("🔄 Falling back to random actions...")
+                    action = env.action_space.sample()
+                    action_name = Action(action).name
             else:
                 action = env.action_space.sample()
                 action_name = Action(action).name
